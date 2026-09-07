@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"mime/multipart"
 	"net/http"
 	"time"
 
@@ -30,18 +29,15 @@ func NewHandler(svc Service, uploader upload.Uploader) *Handler {
 	return &Handler{svc: svc, uploader: uploader}
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Auth handlers
-// ──────────────────────────────────────────────────────────────────────────────
 
 // Register godoc
 // @Summary      Register a new user
-// @Description  Creates a new EMAIL-provider account. Returns access + refresh JWT pair. Duplicate email returns 409.
-// @Tags         Auth
+// @Description  Creates a new EMAIL-provider account. Returns user profile + access/refresh JWT pair. Duplicate email returns 409. Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole). Available auth providers: EMAIL, GOOGLE, APPLE.
+// @Tags         1. Auth - Onboarding
 // @Accept       json
 // @Produce      json
-// @Param        request  body      dto.RegisterRequest  true  "Registration payload"
-// @Success      201      {object}  dto.AuthResponse
+// @Param        request  body      dto.RegisterRequest        true  "Registration payload"
+// @Success      201      {object}  dto.StandardAuthResponse        "Registration successful"
 // @Failure      400      {object}  httpresponse.Error  "Validation error"
 // @Failure      409      {object}  httpresponse.Error  "Email already registered"
 // @Failure      500      {object}  httpresponse.Error
@@ -63,18 +59,18 @@ func (h *Handler) Register(c *echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, httpresponse.NewError(http.StatusInternalServerError, "Registration failed", err.Error()))
 	}
 
-	setTokenCookies(c, resp.AccessToken, resp.RefreshToken)
+	setTokenCookies(c, resp.Data.Tokens.AccessToken, resp.Data.Tokens.RefreshToken)
 	return c.JSON(http.StatusCreated, resp)
 }
 
 // Login godoc
 // @Summary      Login
-// @Description  Authenticates an EMAIL user. Returns access + refresh JWT pair.
-// @Tags         Auth
+// @Description  Authenticates an EMAIL user. Returns user profile + access/refresh JWT pair. Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole).
+// @Tags         1. Auth - Onboarding
 // @Accept       json
 // @Produce      json
-// @Param        request  body      dto.LoginRequest  true  "Login payload"
-// @Success      200      {object}  dto.AuthResponse
+// @Param        request  body      dto.LoginRequest          true  "Login payload"
+// @Success      200      {object}  dto.StandardAuthResponse       "Login successful"
 // @Failure      400      {object}  httpresponse.Error  "Validation error"
 // @Failure      401      {object}  httpresponse.Error  "Invalid credentials"
 // @Router       /api/v1/auth/login [post]
@@ -89,10 +85,71 @@ func (h *Handler) Login(c *echo.Context) error {
 
 	resp, err := h.svc.Login(req)
 	if err != nil {
+		if errors.Is(err, ErrRateLimited) {
+			return c.JSON(http.StatusTooManyRequests, httpresponse.NewError(http.StatusTooManyRequests, "Too many login attempts", "Please try again later"))
+		}
 		if errors.Is(err, ErrInvalidCredentials) {
 			return c.JSON(http.StatusUnauthorized, httpresponse.NewError(http.StatusUnauthorized, "Invalid email or password", ""))
 		}
 		return c.JSON(http.StatusInternalServerError, httpresponse.NewError(http.StatusInternalServerError, "Login failed", err.Error()))
+	}
+
+	setTokenCookies(c, resp.Data.Tokens.AccessToken, resp.Data.Tokens.RefreshToken)
+	return c.JSON(http.StatusOK, resp)
+}
+
+// AdminLogin godoc
+// @Summary      Admin Login
+// @Description  Authenticates an admin using hardcoded credentials. Returns access + refresh JWT pair.
+// @Tags         1. Auth - Onboarding
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.AdminLoginRequest  true  "Admin Login payload"
+// @Success      200      {object}  dto.AuthResponse
+// @Failure      400      {object}  httpresponse.Error  "Validation error"
+// @Failure      401      {object}  httpresponse.Error  "Invalid credentials"
+// @Router       /api/v1/auth/admin/login [post]
+func (h *Handler) AdminLogin(c *echo.Context) error {
+	var req dto.AdminLoginRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.NewError(http.StatusBadRequest, "Invalid request body", err.Error()))
+	}
+	if err := c.Validate(req); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.NewError(http.StatusBadRequest, "Validation failed", err.Error()))
+	}
+
+	resp, err := h.svc.AdminLogin(req.Email, req.Password)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, httpresponse.NewError(http.StatusUnauthorized, "Invalid admin email or password", ""))
+	}
+
+	setTokenCookies(c, resp.AccessToken, resp.RefreshToken)
+	return c.JSON(http.StatusOK, resp)
+}
+
+// SocialLogin godoc
+// @Summary      Social Login
+// @Description  Authenticates a user using Firebase ID token (Google or Apple). Returns access + refresh JWT pair.
+// @Tags         1. Auth - Onboarding
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.SocialLoginRequest  true  "Social Login payload"
+// @Success      200      {object}  dto.AuthResponse
+// @Failure      400      {object}  httpresponse.Error  "Validation error"
+// @Failure      401      {object}  httpresponse.Error  "Invalid token"
+// @Router       /api/v1/auth/social-login [post]
+func (h *Handler) SocialLogin(c *echo.Context) error {
+	var req dto.SocialLoginRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.NewError(http.StatusBadRequest, "Invalid request body", err.Error()))
+	}
+	if err := c.Validate(req); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.NewError(http.StatusBadRequest, "Validation failed", err.Error()))
+	}
+
+	resp, err := h.svc.SocialLogin(c.Request().Context(), req)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, httpresponse.NewError(http.StatusUnauthorized, "Social login failed", err.Error()))
 	}
 
 	setTokenCookies(c, resp.AccessToken, resp.RefreshToken)
@@ -102,7 +159,7 @@ func (h *Handler) Login(c *echo.Context) error {
 // Refresh godoc
 // @Summary      Refresh access token
 // @Description  Rotates the refresh token: revokes the old one and issues a new access + refresh pair. Token may be sent in body or "refresh_token" cookie.
-// @Tags         Auth
+// @Tags         3. Auth - Session Management
 // @Accept       json
 // @Produce      json
 // @Param        request  body      dto.RefreshRequest  false  "Refresh token (omit if using cookie)"
@@ -127,7 +184,7 @@ func (h *Handler) Refresh(c *echo.Context) error {
 // Logout godoc
 // @Summary      Logout
 // @Description  Revokes the current refresh token, ending the session.
-// @Tags         Auth
+// @Tags         3. Auth - Session Management
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
@@ -147,7 +204,7 @@ func (h *Handler) Logout(c *echo.Context) error {
 // ForgotPassword godoc
 // @Summary      Request password reset OTP
 // @Description  Sends a 5-digit OTP to the email (10-min expiry). Always returns 200 to prevent user enumeration.
-// @Tags         Auth
+// @Tags         2. Auth - Password Recovery
 // @Accept       json
 // @Produce      json
 // @Param        request  body      dto.ForgotPasswordRequest  true  "Email address"
@@ -163,20 +220,84 @@ func (h *Handler) ForgotPassword(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, httpresponse.NewError(http.StatusBadRequest, "Validation failed", err.Error()))
 	}
 
-	// Errors intentionally swallowed — no user enumeration
-	_ = h.svc.ForgotPassword(req)
-	return c.JSON(http.StatusOK, dto.MessageResponse{Message: "If this email is registered, an OTP has been sent."})
+	// Rate-limit errors surface as 429; all other errors are swallowed (no user enumeration).
+	err := h.svc.ForgotPassword(req)
+	if errors.Is(err, ErrRateLimited) {
+		return c.JSON(http.StatusTooManyRequests, httpresponse.NewError(http.StatusTooManyRequests, "Too many requests", "Please try again later"))
+	}
+	return c.JSON(http.StatusOK, dto.MessageResponse{Message: "If your email is registered, you will receive an OTP"})
+}
+
+// ResendOTP godoc
+// @Summary      Resend password reset OTP
+// @Description  Enforces a 1-minute cooldown, invalidates old OTPs, and sends a new 5-digit OTP to the email.
+// @Tags         2. Auth - Password Recovery
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.ResendOTPRequest  true  "Email address"
+// @Success      200      {object}  dto.MessageResponse
+// @Failure      400      {object}  httpresponse.Error  "Validation error"
+// @Failure      429      {object}  httpresponse.Error  "Too many requests"
+// @Router       /api/v1/auth/resend-otp [post]
+func (h *Handler) ResendOTP(c *echo.Context) error {
+	var req dto.ResendOTPRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.NewError(http.StatusBadRequest, "Invalid request body", err.Error()))
+	}
+	if err := c.Validate(req); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.NewError(http.StatusBadRequest, "Validation failed", err.Error()))
+	}
+
+	err := h.svc.ResendOTP(req)
+	if errors.Is(err, ErrRateLimited) {
+		return c.JSON(http.StatusTooManyRequests, httpresponse.NewError(http.StatusTooManyRequests, "Too many requests", "Please wait 1 minute before resending"))
+	}
+	return c.JSON(http.StatusOK, dto.MessageResponse{Message: "If your email is registered, you will receive an OTP"})
+}
+
+// VerifyOTP godoc
+// @Summary      Verify OTP for password reset
+// @Description  Verifies the 5-digit OTP and returns a temporary reset token.
+// @Tags         2. Auth - Password Recovery
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.VerifyOTPRequest  true  "Email + OTP"
+// @Success      200      {object}  dto.StandardResponse{data=dto.VerifyOTPResponse}
+// @Failure      400      {object}  httpresponse.Error  "Invalid or expired OTP"
+// @Router       /api/v1/auth/verify-otp [post]
+func (h *Handler) VerifyOTP(c *echo.Context) error {
+	var req dto.VerifyOTPRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.NewError(http.StatusBadRequest, "Invalid request body", err.Error()))
+	}
+	if err := c.Validate(req); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.NewError(http.StatusBadRequest, "Validation failed", err.Error()))
+	}
+
+	resp, err := h.svc.VerifyOTP(req)
+	if err != nil {
+		if errors.Is(err, ErrInvalidOTP) {
+			return c.JSON(http.StatusBadRequest, httpresponse.NewError(http.StatusBadRequest, "Invalid, expired, or already used OTP", ""))
+		}
+		return c.JSON(http.StatusInternalServerError, httpresponse.NewError(http.StatusInternalServerError, "Failed to verify OTP", err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, dto.StandardResponse{
+		Success: true,
+		Message: "OTP verified successfully",
+		Data:    resp,
+	})
 }
 
 // ResetPassword godoc
-// @Summary      Reset password with OTP
-// @Description  Verifies the 5-digit OTP and updates the user password.
-// @Tags         Auth
+// @Summary      Reset password with reset token
+// @Description  Verifies the temporary reset token and updates the user password, revoking all existing sessions.
+// @Tags         2. Auth - Password Recovery
 // @Accept       json
 // @Produce      json
-// @Param        request  body      dto.ResetPasswordRequest  true  "Email + OTP + new password"
+// @Param        request  body      dto.ResetPasswordRequest  true  "Reset token + new password"
 // @Success      200      {object}  dto.MessageResponse
-// @Failure      400      {object}  httpresponse.Error  "Invalid or expired OTP"
+// @Failure      400      {object}  httpresponse.Error  "Invalid or expired reset token"
 // @Failure      500      {object}  httpresponse.Error
 // @Router       /api/v1/auth/reset-password [post]
 func (h *Handler) ResetPassword(c *echo.Context) error {
@@ -189,17 +310,14 @@ func (h *Handler) ResetPassword(c *echo.Context) error {
 	}
 
 	if err := h.svc.ResetPassword(req); err != nil {
-		if errors.Is(err, ErrInvalidOTP) {
-			return c.JSON(http.StatusBadRequest, httpresponse.NewError(http.StatusBadRequest, "Invalid, expired, or already used OTP", ""))
+		if err.Error() == "invalid or expired reset token" {
+			return c.JSON(http.StatusBadRequest, httpresponse.NewError(http.StatusBadRequest, "Invalid or expired reset token", ""))
 		}
 		return c.JSON(http.StatusInternalServerError, httpresponse.NewError(http.StatusInternalServerError, "Failed to reset password", err.Error()))
 	}
 	return c.JSON(http.StatusOK, dto.MessageResponse{Message: "Password reset successfully"})
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Profile handlers
-// ──────────────────────────────────────────────────────────────────────────────
 
 // GetMe godoc
 // @Summary      Get current user profile
@@ -226,7 +344,7 @@ func (h *Handler) GetMe(c *echo.Context) error {
 
 // UpdateMe godoc
 // @Summary      Update profile
-// @Description  Updates name, location, theme preference, or language preference.
+// @Description  Updates name, location, theme preference (Available: LIGHT, DARK), or language preference. Duplicate email returns 409. Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole).
 // @Tags         Users
 // @Accept       json
 // @Produce      json
@@ -357,32 +475,23 @@ func (h *Handler) UploadAvatar(c *echo.Context) error {
 	}
 	defer file.Close()
 
-	result, err := h.uploader.Upload(c.Request().Context(), file.(multipart.File), "zick/avatars")
+	result, err := h.uploader.Upload(c.Request().Context(), file, "zick/avatars")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, httpresponse.NewError(http.StatusInternalServerError, "Upload failed", err.Error()))
 	}
 
-	// Persist avatar URL on the user record
-	if _, err := h.svc.UpdateProfileByEmail(email, dto.UpdateProfileRequest{}); err != nil {
-		// Non-critical: avatar was uploaded but profile update failed
+	if _, err := h.svc.UpdateAvatarURLByEmail(email, result.URL); err != nil {
 		_ = h.uploader.Delete(c.Request().Context(), result.PublicID)
-		return c.JSON(http.StatusInternalServerError, httpresponse.NewError(http.StatusInternalServerError, "Failed to update avatar URL", err.Error()))
+		return c.JSON(http.StatusInternalServerError, httpresponse.NewError(http.StatusInternalServerError, "Failed to save avatar URL", err.Error()))
 	}
-
-	// Directly update avatar field
-	u, _ := h.svc.GetProfileByEmail(email)
-	_ = u
 
 	return c.JSON(http.StatusOK, dto.AvatarResponse{AvatarURL: result.URL})
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Device handler
-// ──────────────────────────────────────────────────────────────────────────────
 
 // RegisterDevice godoc
 // @Summary      Register device token
-// @Description  Registers or refreshes an FCM (Android) or APNs (iOS) push notification token. Upserts on (user_id, token).
+// @Description  Registers or refreshes an FCM (Android) or APNs (iOS) push notification token. Upserts on (user_id, token). Available platforms: IOS, ANDROID.
 // @Tags         Devices
 // @Accept       json
 // @Produce      json
@@ -418,9 +527,6 @@ func (h *Handler) RegisterDevice(c *echo.Context) error {
 	return c.JSON(http.StatusOK, dto.MessageResponse{Message: "Device registered successfully"})
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Shared helpers
-// ──────────────────────────────────────────────────────────────────────────────
 
 // claimsEmail extracts the email from JWT claims stored in Echo context.
 // NOTE: The current jwt.go stores email in JwtCustomClaims.Email; UUID is resolved by email.

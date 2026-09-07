@@ -2,6 +2,11 @@
 
 GoTickets is a robust backend service for a ticket booking platform, implemented in Go. It provides comprehensive functionality for user authentication, event lifecycle management, and ticket reservations. The service is built on top of the Echo web framework and utilizes GORM for data persistence.
 
+## Live Environment
+
+- **BASE URL:** https://altar.softvencealpha.com/
+- **Swagger Docs:** https://altar.softvencealpha.com/swagger/index.html
+
 ## Architecture
 
 This project strictly adheres to a Domain-Driven Design (DDD) layered architecture to ensure a clean separation of concerns, high maintainability, and testability.

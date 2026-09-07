@@ -4,10 +4,42 @@ import (
 	"context"
 	"fmt"
 	"mime/multipart"
+	"net/url"
+	"path"
+	"regexp"
+	"strings"
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 )
+
+// versionSegment matches a Cloudinary version prefix like "v1787740828/".
+var versionSegment = regexp.MustCompile(`^v\d+/`)
+
+// PublicIDFromURL extracts the Cloudinary public_id from a full secure URL.
+//
+// Example:
+//
+//	"https://res.cloudinary.com/demo/image/upload/v1234567890/zick/avatars/abc.jpg"
+//	→ "zick/avatars/abc"
+func PublicIDFromURL(rawURL string) (string, error) {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return "", fmt.Errorf("invalid URL: %w", err)
+	}
+
+	// Path looks like: /demo/image/upload/v1234567890/zick/avatars/abc.jpg
+	parts := strings.SplitN(u.Path, "/upload/", 2)
+	if len(parts) != 2 {
+		return "", fmt.Errorf("URL does not look like a Cloudinary upload URL")
+	}
+
+	after := parts[1]                      // "v1234567890/zick/avatars/abc.jpg"
+	after = versionSegment.ReplaceAllString(after, "") // "zick/avatars/abc.jpg"
+	after = strings.TrimSuffix(after, path.Ext(after)) // "zick/avatars/abc"
+	return after, nil
+}
+
 
 type cloudinaryUploader struct {
 	cld *cloudinary.Cloudinary

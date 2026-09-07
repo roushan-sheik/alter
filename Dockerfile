@@ -51,6 +51,6 @@ COPY --from=builder --chown=appuser:appgroup /app/gotickets .
 
 USER appuser
 
-EXPOSE 5000
+EXPOSE 5525
 
 ENTRYPOINT ["./gotickets"]

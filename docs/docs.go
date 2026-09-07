@@ -25,19 +25,473 @@ const docTemplate = `{
     "paths": {
         "/": {
             "get": {
-                "description": "Root endpoint to verify the API is running.",
+                "description": "Root endpoint — confirms the API is running.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "System"
                 ],
-                "summary": "Welcome to GoTickets API",
+                "summary": "Welcome",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/internal_server.WelcomeResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/library": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin endpoint to create a new library item.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Library"
+                ],
+                "summary": "Create a library item",
+                "parameters": [
+                    {
+                        "description": "Library payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_library_dto.CreateLibraryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_library_dto.LibraryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/library-categories": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin endpoint to create a new category.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Library Categories"
+                ],
+                "summary": "Create a library category",
+                "parameters": [
+                    {
+                        "description": "Category payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_library_dto.CreateCategoryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_library_dto.CategoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/library-categories/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin endpoint to update a category.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Library Categories"
+                ],
+                "summary": "Update a library category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Category payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_library_dto.UpdateCategoryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_library_dto.CategoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin endpoint to delete a category.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Library Categories"
+                ],
+                "summary": "Delete a library category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/library/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin endpoint to update an existing library item.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Library"
+                ],
+                "summary": "Update a library item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Library Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Library payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_library_dto.UpdateLibraryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_library_dto.LibraryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin endpoint to delete an existing library item.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Library"
+                ],
+                "summary": "Delete a library item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Library Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/motivations": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin endpoint to create a new motivation.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Motivation"
+                ],
+                "summary": "Create a motivation",
+                "parameters": [
+                    {
+                        "description": "Motivation payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_motivation_dto.CreateMotivationReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_motivation_dto.MotivationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/motivations/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin endpoint to update an existing motivation.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Motivation"
+                ],
+                "summary": "Update a motivation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Motivation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Motivation payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_motivation_dto.UpdateMotivationReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_motivation_dto.MotivationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin endpoint to delete an existing motivation.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Motivation"
+                ],
+                "summary": "Delete a motivation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Motivation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/admin/login": {
+            "post": {
+                "description": "Authenticates an admin using hardcoded credentials. Returns access + refresh JWT pair.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "1. Auth - Onboarding"
+                ],
+                "summary": "Admin Login",
+                "parameters": [
+                    {
+                        "description": "Admin Login payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_user_dto.AdminLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_user_dto.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
                         }
                     }
                 }
@@ -53,7 +507,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "2. Auth - Password Recovery"
                 ],
                 "summary": "Request password reset OTP",
                 "parameters": [
@@ -85,7 +539,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/login": {
             "post": {
-                "description": "Authenticates an EMAIL user. Returns access + refresh JWT pair.",
+                "description": "Authenticates an EMAIL user. Returns user profile + access/refresh JWT pair. Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole).",
                 "consumes": [
                     "application/json"
                 ],
@@ -93,7 +547,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "1. Auth - Onboarding"
                 ],
                 "summary": "Login",
                 "parameters": [
@@ -109,9 +563,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Login successful",
                         "schema": {
-                            "$ref": "#/definitions/gotickets_internal_domain_user_dto.AuthResponse"
+                            "$ref": "#/definitions/gotickets_internal_domain_user_dto.StandardAuthResponse"
                         }
                     },
                     "400": {
@@ -144,7 +598,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "3. Auth - Session Management"
                 ],
                 "summary": "Logout",
                 "parameters": [
@@ -183,7 +637,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "3. Auth - Session Management"
                 ],
                 "summary": "Refresh access token",
                 "parameters": [
@@ -214,7 +668,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/register": {
             "post": {
-                "description": "Creates a new EMAIL-provider account. Returns access + refresh JWT pair. Duplicate email returns 409.",
+                "description": "Creates a new EMAIL-provider account. Returns user profile + access/refresh JWT pair. Duplicate email returns 409. Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole). Available auth providers: EMAIL, GOOGLE, APPLE.",
                 "consumes": [
                     "application/json"
                 ],
@@ -222,7 +676,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "1. Auth - Onboarding"
                 ],
                 "summary": "Register a new user",
                 "parameters": [
@@ -238,9 +692,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Registration successful",
                         "schema": {
-                            "$ref": "#/definitions/gotickets_internal_domain_user_dto.AuthResponse"
+                            "$ref": "#/definitions/gotickets_internal_domain_user_dto.StandardAuthResponse"
                         }
                     },
                     "400": {
@@ -264,9 +718,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/auth/reset-password": {
+        "/api/v1/auth/resend-otp": {
             "post": {
-                "description": "Verifies the 5-digit OTP and updates the user password.",
+                "description": "Enforces a 1-minute cooldown, invalidates old OTPs, and sends a new 5-digit OTP to the email.",
                 "consumes": [
                     "application/json"
                 ],
@@ -274,12 +728,58 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "2. Auth - Password Recovery"
                 ],
-                "summary": "Reset password with OTP",
+                "summary": "Resend password reset OTP",
                 "parameters": [
                     {
-                        "description": "Email + OTP + new password",
+                        "description": "Email address",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_user_dto.ResendOTPRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_user_dto.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/reset-password": {
+            "post": {
+                "description": "Verifies the temporary reset token and updates the user password, revoking all existing sessions.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "2. Auth - Password Recovery"
+                ],
+                "summary": "Reset password with reset token",
+                "parameters": [
+                    {
+                        "description": "Reset token + new password",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -296,232 +796,111 @@ const docTemplate = `{
                         }
                     },
                     "400": {
+                        "description": "Invalid or expired reset token",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/social-login": {
+            "post": {
+                "description": "Authenticates a user using Firebase ID token (Google or Apple). Returns access + refresh JWT pair.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "1. Auth - Onboarding"
+                ],
+                "summary": "Social Login",
+                "parameters": [
+                    {
+                        "description": "Social Login payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_user_dto.SocialLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_user_dto.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/verify-otp": {
+            "post": {
+                "description": "Verifies the 5-digit OTP and returns a temporary reset token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "2. Auth - Password Recovery"
+                ],
+                "summary": "Verify OTP for password reset",
+                "parameters": [
+                    {
+                        "description": "Email + OTP",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_user_dto.VerifyOTPRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/gotickets_internal_domain_user_dto.StandardResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/gotickets_internal_domain_user_dto.VerifyOTPResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
                         "description": "Invalid or expired OTP",
-                        "schema": {
-                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/content": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Returns a paginated, filterable list of content items. Supports ` + "`" + `type` + "`" + `, ` + "`" + `sub_type` + "`" + `, ` + "`" + `audience` + "`" + `, ` + "`" + `category_tag` + "`" + `, and ` + "`" + `q` + "`" + ` (full-text search) query parameters.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Content"
-                ],
-                "summary": "List content",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Content type (PRAYER, MOTIVATION, WORSHIP, PROVERB, DAILY_QUOTE, ILLUSTRATION, ENCOURAGEMENT)",
-                        "name": "type",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Sub-type (e.g. Morning, Night)",
-                        "name": "sub_type",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Audience (ALL, KIDS, TEENS)",
-                        "name": "audience",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Category tag (e.g. Thanksgiving, Intercession)",
-                        "name": "category_tag",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Full-text search query",
-                        "name": "q",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Page number (default: 1)",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Items per page (default: 20, max: 100)",
-                        "name": "page_size",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/gotickets_internal_domain_content_dto.ContentListResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/content/daily-quote": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Returns the DAILY_QUOTE content item for the current date, filtered by published_at.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Content"
-                ],
-                "summary": "Get today's daily quote",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/gotickets_internal_domain_content_dto.ContentDetail"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "No quote for today",
-                        "schema": {
-                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/content/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Returns full detail for a content item. If the content is premium and the user is not premium, returns HTTP 403 with an upgrade prompt.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Content"
-                ],
-                "summary": "Get content detail",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Content UUID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/gotickets_internal_domain_content_dto.ContentDetail"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Premium content — upgrade required",
-                        "schema": {
-                            "$ref": "#/definitions/gotickets_internal_domain_content_dto.PremiumGateResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/content/{id}/related": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Returns a list of content items related to the given content ID via the related_content join table.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Content"
-                ],
-                "summary": "Get related content",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Content UUID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/gotickets_internal_domain_content_dto.ContentSummary"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
                         }
@@ -536,7 +915,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Registers or refreshes an FCM (Android) or APNs (iOS) push notification token. Upserts on (user_id, token).",
+                "description": "Registers or refreshes an FCM (Android) or APNs (iOS) push notification token. Upserts on (user_id, token). Available platforms: IOS, ANDROID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -579,6 +958,221 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/library": {
+            "get": {
+                "description": "Retrieves a paginated list of library items. Supports search, sort, category filtering, and pagination via query params.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Library"
+                ],
+                "summary": "Get all library items",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search by title, category, or description",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by category",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort column; prefix with - for DESC (e.g. -created_at)",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_library_dto.PaginatedLibraryResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/library-categories": {
+            "get": {
+                "description": "Retrieves all library categories.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Library Categories"
+                ],
+                "summary": "Get all library categories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/gotickets_internal_domain_library_dto.CategoryResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/library/{id}": {
+            "get": {
+                "description": "Retrieves details of a specific library item along with related items.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Library"
+                ],
+                "summary": "Get library item details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Library Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_library_dto.LibraryDetailsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/motivations": {
+            "get": {
+                "description": "Retrieves a paginated list of motivation items. Supports search, sort, and pagination via query params.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Motivation"
+                ],
+                "summary": "Get all motivations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search by title or speaker name",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort column; prefix with - for DESC (e.g. -created_at)",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_motivation_dto.PaginatedMotivationResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/motivations/{id}": {
+            "get": {
+                "description": "Retrieves details of a specific motivation along with related motivations.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Motivation"
+                ],
+                "summary": "Get motivation details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Motivation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_domain_motivation_dto.MotivationDetailsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
                         }
@@ -821,6 +1415,122 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/upload": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Uploads any file (image, audio, etc.) to Cloudinary and returns the public URL.\nPass an optional ` + "`" + `folder` + "`" + ` query parameter to organise assets (e.g. ` + "`" + `?folder=content/thumbnails` + "`" + `).\nThe returned ` + "`" + `url` + "`" + ` can be stored and referenced by any domain (content, profile, etc.).",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Media"
+                ],
+                "summary": "Upload a file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cloudinary folder (default: zick/uploads)",
+                        "name": "folder",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_domain_media.UploadResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or oversized file",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    },
+                    "503": {
+                        "description": "Upload service unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Permanently removes a file from Cloudinary using its public_id.\nThe public_id is returned by POST /api/v1/upload.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Media"
+                ],
+                "summary": "Delete an uploaded file",
+                "parameters": [
+                    {
+                        "description": "Full Cloudinary URL to delete",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_domain_media.DeleteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_domain_media.DeleteResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing public_id",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    },
+                    "503": {
+                        "description": "Upload service unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/gotickets_internal_httpresponse.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/users/me": {
             "get": {
                 "security": [
@@ -863,7 +1573,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Updates name, location, theme preference, or language preference.",
+                "description": "Updates name, location, theme preference (Available: LIGHT, DARK), or language preference. Duplicate email returns 409. Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole).",
                 "consumes": [
                     "application/json"
                 ],
@@ -1062,7 +1772,7 @@ const docTemplate = `{
         },
         "/health": {
             "get": {
-                "description": "Check the health status of the API and the database connection.",
+                "description": "Returns API metadata and database connectivity status.",
                 "produces": [
                     "application/json"
                 ],
@@ -1082,168 +1792,290 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "gotickets_internal_domain_content_dto.ContentDetail": {
+        "gotickets_internal_domain_library_dto.CategoryResponse": {
             "type": "object",
             "properties": {
-                "audiences": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "author_or_speaker": {
-                    "type": "string",
-                    "example": "Pastor John"
-                },
-                "body_text": {
-                    "type": "string",
-                    "example": "Dear Lord, thank you for this day..."
-                },
-                "category_tag": {
-                    "type": "string",
-                    "example": "Thanksgiving"
-                },
-                "duration_seconds": {
-                    "type": "integer",
-                    "example": 180
-                },
                 "id": {
-                    "type": "string",
-                    "example": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+                    "type": "string"
                 },
-                "is_premium": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "media_type": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "gotickets_internal_domain_library_dto.CreateCategoryReq": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
                     "type": "string",
-                    "example": "AUDIO"
+                    "maxLength": 100
+                }
+            }
+        },
+        "gotickets_internal_domain_library_dto.CreateLibraryReq": {
+            "type": "object",
+            "required": [
+                "category",
+                "content_text",
+                "short_description",
+                "thumbnail_url",
+                "title"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "content_text": {
+                    "type": "string"
                 },
                 "media_url": {
-                    "description": "nil if premium-gated",
-                    "type": "string",
-                    "example": "https://example.com/audio.mp3"
+                    "type": "string"
                 },
-                "published_at": {
+                "short_description": {
+                    "type": "string"
+                },
+                "thumbnail_url": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string",
-                    "example": "2026-08-17T15:00:00Z"
+                    "maxLength": 255
+                }
+            }
+        },
+        "gotickets_internal_domain_library_dto.LibraryDetailsResponse": {
+            "type": "object",
+            "properties": {
+                "library_item": {
+                    "$ref": "#/definitions/gotickets_internal_domain_library_dto.LibraryResponse"
                 },
                 "related": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/gotickets_internal_domain_content_dto.ContentSummary"
+                        "$ref": "#/definitions/gotickets_internal_domain_library_dto.LibraryResponse"
                     }
-                },
-                "sub_type": {
-                    "type": "string",
-                    "example": "Morning"
-                },
-                "thumbnail_url": {
-                    "type": "string",
-                    "example": "https://example.com/thumb.jpg"
-                },
-                "title": {
-                    "type": "string",
-                    "example": "Morning Prayer for Peace"
-                },
-                "type": {
-                    "type": "string",
-                    "example": "PRAYER"
                 }
             }
         },
-        "gotickets_internal_domain_content_dto.ContentListResponse": {
+        "gotickets_internal_domain_library_dto.LibraryResponse": {
             "type": "object",
             "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/gotickets_internal_domain_content_dto.ContentSummary"
-                    }
+                "category": {
+                    "type": "string"
                 },
-                "page": {
-                    "type": "integer",
-                    "example": 1
+                "content_text": {
+                    "type": "string"
                 },
-                "page_size": {
-                    "type": "integer",
-                    "example": 20
-                },
-                "total": {
-                    "type": "integer",
-                    "example": 100
-                }
-            }
-        },
-        "gotickets_internal_domain_content_dto.ContentSummary": {
-            "type": "object",
-            "properties": {
-                "audiences": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "author_or_speaker": {
-                    "type": "string",
-                    "example": "Pastor John"
-                },
-                "category_tag": {
-                    "type": "string",
-                    "example": "Thanksgiving"
-                },
-                "duration_seconds": {
-                    "type": "integer",
-                    "example": 180
+                "created_at": {
+                    "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+                    "type": "string"
                 },
-                "is_premium": {
-                    "type": "boolean",
-                    "example": true
+                "media_url": {
+                    "type": "string"
                 },
-                "media_type": {
-                    "type": "string",
-                    "example": "AUDIO"
-                },
-                "published_at": {
-                    "type": "string",
-                    "example": "2026-08-17T15:00:00Z"
-                },
-                "sub_type": {
-                    "type": "string",
-                    "example": "Morning"
+                "short_description": {
+                    "type": "string"
                 },
                 "thumbnail_url": {
-                    "type": "string",
-                    "example": "https://example.com/thumb.jpg"
+                    "type": "string"
                 },
                 "title": {
-                    "type": "string",
-                    "example": "Morning Prayer for Peace"
+                    "type": "string"
                 },
-                "type": {
-                    "type": "string",
-                    "example": "PRAYER"
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
-        "gotickets_internal_domain_content_dto.PremiumGateResponse": {
+        "gotickets_internal_domain_library_dto.PaginatedLibraryResponse": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "integer",
-                    "example": 403
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gotickets_internal_domain_library_dto.LibraryResponse"
+                    }
                 },
-                "message": {
+                "meta": {
+                    "$ref": "#/definitions/gotickets_internal_querybuilder.Meta"
+                }
+            }
+        },
+        "gotickets_internal_domain_library_dto.UpdateCategoryReq": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
                     "type": "string",
-                    "example": "Operation successful"
+                    "maxLength": 100
+                }
+            }
+        },
+        "gotickets_internal_domain_library_dto.UpdateLibraryReq": {
+            "type": "object",
+            "required": [
+                "category",
+                "content_text",
+                "short_description",
+                "thumbnail_url",
+                "title"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "maxLength": 100
                 },
-                "upgrade_url": {
+                "content_text": {
+                    "type": "string"
+                },
+                "media_url": {
+                    "type": "string"
+                },
+                "short_description": {
+                    "type": "string"
+                },
+                "thumbnail_url": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string",
-                    "example": "/api/v1/subscriptions/plans"
+                    "maxLength": 255
+                }
+            }
+        },
+        "gotickets_internal_domain_motivation_dto.CreateMotivationReq": {
+            "type": "object",
+            "required": [
+                "description",
+                "duration",
+                "speaker_name",
+                "thumbnail_url",
+                "title",
+                "video_url"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "speaker_name": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "thumbnail_url": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "video_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "gotickets_internal_domain_motivation_dto.MotivationDetailsResponse": {
+            "type": "object",
+            "properties": {
+                "motivation": {
+                    "$ref": "#/definitions/gotickets_internal_domain_motivation_dto.MotivationResponse"
+                },
+                "related": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gotickets_internal_domain_motivation_dto.MotivationResponse"
+                    }
+                }
+            }
+        },
+        "gotickets_internal_domain_motivation_dto.MotivationResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "speaker_name": {
+                    "type": "string"
+                },
+                "thumbnail_url": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "video_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "gotickets_internal_domain_motivation_dto.PaginatedMotivationResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gotickets_internal_domain_motivation_dto.MotivationResponse"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/gotickets_internal_querybuilder.Meta"
+                }
+            }
+        },
+        "gotickets_internal_domain_motivation_dto.UpdateMotivationReq": {
+            "type": "object",
+            "required": [
+                "description",
+                "duration",
+                "speaker_name",
+                "thumbnail_url",
+                "title",
+                "video_url"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "speaker_name": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "thumbnail_url": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "video_url": {
+                    "type": "string"
                 }
             }
         },
@@ -1419,6 +2251,46 @@ const docTemplate = `{
                 }
             }
         },
+        "gotickets_internal_domain_user_dto.AdminLoginRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "admin@altar.com"
+                },
+                "language_preference": {
+                    "description": "Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole)",
+                    "type": "string",
+                    "enum": [
+                        "en",
+                        "fr",
+                        "es",
+                        "pt",
+                        "ht"
+                    ],
+                    "example": "en"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "Admin1234"
+                }
+            }
+        },
+        "gotickets_internal_domain_user_dto.AuthDataResponse": {
+            "type": "object",
+            "properties": {
+                "tokens": {
+                    "$ref": "#/definitions/gotickets_internal_domain_user_dto.TokenDTO"
+                },
+                "user": {
+                    "$ref": "#/definitions/gotickets_internal_domain_user_dto.UserDTO"
+                }
+            }
+        },
         "gotickets_internal_domain_user_dto.AuthResponse": {
             "type": "object",
             "properties": {
@@ -1487,6 +2359,18 @@ const docTemplate = `{
                     "type": "string",
                     "example": "user@example.com"
                 },
+                "language_preference": {
+                    "description": "Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole)",
+                    "type": "string",
+                    "enum": [
+                        "en",
+                        "fr",
+                        "es",
+                        "pt",
+                        "ht"
+                    ],
+                    "example": "en"
+                },
                 "password": {
                     "type": "string",
                     "example": "Secret123!"
@@ -1505,6 +2389,10 @@ const docTemplate = `{
         "gotickets_internal_domain_user_dto.ProfileResponse": {
             "type": "object",
             "properties": {
+                "age": {
+                    "type": "integer",
+                    "example": 25
+                },
                 "auth_provider": {
                     "type": "string",
                     "example": "EMAIL"
@@ -1584,14 +2472,38 @@ const docTemplate = `{
         "gotickets_internal_domain_user_dto.RegisterRequest": {
             "type": "object",
             "required": [
+                "age",
+                "agreeTermsAndConditions",
                 "email",
                 "name",
                 "password"
             ],
             "properties": {
+                "age": {
+                    "type": "integer",
+                    "maximum": 120,
+                    "minimum": 0,
+                    "example": 25
+                },
+                "agreeTermsAndConditions": {
+                    "type": "boolean",
+                    "example": true
+                },
                 "email": {
                     "type": "string",
                     "example": "user@example.com"
+                },
+                "language_preference": {
+                    "description": "Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole)",
+                    "type": "string",
+                    "enum": [
+                        "en",
+                        "fr",
+                        "es",
+                        "pt",
+                        "ht"
+                    ],
+                    "example": "en"
                 },
                 "name": {
                     "type": "string",
@@ -1606,34 +2518,128 @@ const docTemplate = `{
                 }
             }
         },
+        "gotickets_internal_domain_user_dto.ResendOTPRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                }
+            }
+        },
         "gotickets_internal_domain_user_dto.ResetPasswordRequest": {
             "type": "object",
             "required": [
-                "email",
                 "new_password",
-                "otp"
+                "reset_token"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "NewSecret123!"
+                },
+                "reset_token": {
+                    "type": "string",
+                    "example": "eyJhb..."
+                }
+            }
+        },
+        "gotickets_internal_domain_user_dto.SocialLoginRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "id_token",
+                "provider"
             ],
             "properties": {
                 "email": {
                     "type": "string",
                     "example": "user@example.com"
                 },
-                "new_password": {
+                "id_token": {
                     "type": "string",
-                    "minLength": 8,
-                    "example": "NewSecret123!"
+                    "example": "eyJhbGciOi..."
                 },
-                "otp": {
+                "name": {
                     "type": "string",
-                    "example": "12345"
+                    "example": "John Doe"
+                },
+                "provider": {
+                    "type": "string",
+                    "enum": [
+                        "google",
+                        "apple"
+                    ],
+                    "example": "google"
+                }
+            }
+        },
+        "gotickets_internal_domain_user_dto.StandardAuthResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/gotickets_internal_domain_user_dto.AuthDataResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Login successful"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "gotickets_internal_domain_user_dto.StandardResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string",
+                    "example": "Operation successful"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "gotickets_internal_domain_user_dto.TokenDTO": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsIn..."
+                },
+                "refresh_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsIn..."
                 }
             }
         },
         "gotickets_internal_domain_user_dto.UpdateProfileRequest": {
             "type": "object",
             "properties": {
+                "age": {
+                    "type": "integer",
+                    "maximum": 120,
+                    "minimum": 0,
+                    "example": 25
+                },
                 "language_preference": {
+                    "description": "Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole)",
                     "type": "string",
+                    "enum": [
+                        "en",
+                        "fr",
+                        "es",
+                        "pt",
+                        "ht"
+                    ],
                     "example": "en"
                 },
                 "location": {
@@ -1647,12 +2653,64 @@ const docTemplate = `{
                     "example": "John Doe"
                 },
                 "theme_preference": {
+                    "description": "Available themes: LIGHT, DARK",
                     "type": "string",
                     "enum": [
-                        "IVORY",
-                        "NAVY"
+                        "LIGHT",
+                        "DARK"
                     ],
-                    "example": "NAVY"
+                    "example": "DARK"
+                }
+            }
+        },
+        "gotickets_internal_domain_user_dto.UserDTO": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string",
+                    "example": "https://example.com/avatar.jpg"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "role": {
+                    "type": "string",
+                    "example": "user"
+                }
+            }
+        },
+        "gotickets_internal_domain_user_dto.VerifyOTPRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "otp"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "otp": {
+                    "type": "string",
+                    "example": "12345"
+                }
+            }
+        },
+        "gotickets_internal_domain_user_dto.VerifyOTPResponse": {
+            "type": "object",
+            "properties": {
+                "reset_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsIn..."
                 }
             }
         },
@@ -1670,16 +2728,83 @@ const docTemplate = `{
                 }
             }
         },
+        "gotickets_internal_querybuilder.Meta": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "description": "Limit is the number of items per page.",
+                    "type": "integer"
+                },
+                "page": {
+                    "description": "Page is the current page number (1-indexed).",
+                    "type": "integer"
+                },
+                "total": {
+                    "description": "Total is the total number of matching records.",
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "description": "TotalPages is the total number of pages.",
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_domain_media.DeleteRequest": {
+            "type": "object",
+            "required": [
+                "url"
+            ],
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "example": "https://res.cloudinary.com/demo/image/upload/v1234/zick/uploads/abc.jpg"
+                }
+            }
+        },
+        "internal_domain_media.DeleteResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "File deleted successfully"
+                }
+            }
+        },
+        "internal_domain_media.UploadResponse": {
+            "type": "object",
+            "properties": {
+                "public_id": {
+                    "type": "string",
+                    "example": "zick/content/abc123"
+                },
+                "url": {
+                    "type": "string",
+                    "example": "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+                }
+            }
+        },
         "internal_server.HealthResponse": {
             "type": "object",
             "properties": {
                 "database": {
                     "type": "string"
                 },
+                "docs_url": {
+                    "type": "string"
+                },
+                "environment": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
                 "status": {
                     "type": "string"
                 },
                 "timestamp": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }
@@ -1718,7 +2843,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "2.0",
-	Host:             "localhost:5000",
+	Host:             "",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "ZICK API",

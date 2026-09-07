@@ -1,53 +1,75 @@
 package dto
 
-// RegisterRequest is the body for POST /api/v1/auth/register.
 type RegisterRequest struct {
-	Name     string `json:"name" example:"John Doe"     validate:"required,min=2,max=100"`
-	Email    string `json:"email" example:"user@example.com"    validate:"required,email"`
-	Password string `json:"password" example:"Secret123!" validate:"required,min=8"`
+	Name                    string `json:"name" example:"John Doe"     validate:"required,min=2,max=100"`
+	Email                   string `json:"email" example:"user@example.com"    validate:"required,email"`
+	Password                string `json:"password" example:"Secret123!" validate:"required,min=8"`
+	AgreeTermsAndConditions bool   `json:"agreeTermsAndConditions" example:"true" validate:"required"`
+	// Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole)
+	LanguagePreference      string `json:"language_preference" example:"en" enums:"en,fr,es,pt,ht" validate:"omitempty,oneof=en fr es pt ht"`
+	Age                     int    `json:"age" example:"25" validate:"required,min=0,max=120"`
 }
 
-// LoginRequest is the body for POST /api/v1/auth/login.
 type LoginRequest struct {
-	Email    string `json:"email" example:"user@example.com"    validate:"required,email"`
-	Password string `json:"password" example:"Secret123!" validate:"required"`
+	Email              string `json:"email" example:"user@example.com"    validate:"required,email"`
+	Password           string `json:"password" example:"Secret123!" validate:"required"`
+	// Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole)
+	LanguagePreference string `json:"language_preference" example:"en" enums:"en,fr,es,pt,ht" validate:"omitempty,oneof=en fr es pt ht"`
 }
 
-// RefreshRequest is the optional body for POST /api/v1/auth/refresh.
-// The refresh token can also be read from the "refresh_token" cookie.
+type AdminLoginRequest struct {
+	Email              string `json:"email" example:"admin@altar.com"    validate:"required,email"`
+	Password           string `json:"password" example:"Admin1234" validate:"required"`
+	// Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole)
+	LanguagePreference string `json:"language_preference" example:"en" enums:"en,fr,es,pt,ht" validate:"omitempty,oneof=en fr es pt ht"`
+}
+
 type RefreshRequest struct {
 	RefreshToken string `json:"refresh_token" example:"eyJhbGciOiJIUzI1NiIsIn..."`
 }
 
-// ForgotPasswordRequest is the body for POST /api/v1/auth/forgot-password.
 type ForgotPasswordRequest struct {
 	Email string `json:"email" example:"user@example.com" validate:"required,email"`
 }
 
-// ResetPasswordRequest is the body for POST /api/v1/auth/reset-password.
+type ResendOTPRequest struct {
+	Email string `json:"email" example:"user@example.com" validate:"required,email"`
+}
+
+type VerifyOTPRequest struct {
+	Email string `json:"email" example:"user@example.com" validate:"required,email"`
+	OTP   string `json:"otp" example:"12345"          validate:"required,len=5"`
+}
+
 type ResetPasswordRequest struct {
-	Email       string `json:"email" example:"user@example.com"        validate:"required,email"`
-	OTP         string `json:"otp" example:"12345"          validate:"required,len=5"`
+	ResetToken  string `json:"reset_token" example:"eyJhb..." validate:"required"`
 	NewPassword string `json:"new_password" example:"NewSecret123!" validate:"required,min=8"`
 }
 
-// UpdateProfileRequest is the body for PUT /api/v1/users/me.
 type UpdateProfileRequest struct {
 	Name               *string `json:"name" example:"John Doe"                omitempty:"true" validate:"omitempty,min=2,max=100"`
 	Location           *string `json:"location" example:"New York, USA"            omitempty:"true"`
-	ThemePreference    *string `json:"theme_preference" example:"NAVY"    omitempty:"true" validate:"omitempty,oneof=IVORY NAVY"`
-	LanguagePreference *string `json:"language_preference" example:"en" omitempty:"true"`
+	// Available themes: LIGHT, DARK
+	ThemePreference    *string `json:"theme_preference" example:"DARK" enums:"LIGHT,DARK" omitempty:"true" validate:"omitempty,oneof=LIGHT DARK"`
+	// Available languages: en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole)
+	LanguagePreference *string `json:"language_preference" example:"en" enums:"en,fr,es,pt,ht" omitempty:"true" validate:"omitempty,oneof=en fr es pt ht"`
+	Age                *int    `json:"age" example:"25" omitempty:"true" validate:"omitempty,min=0,max=120"`
 }
 
-// ChangePasswordRequest is the body for PUT /api/v1/users/me/password.
 type ChangePasswordRequest struct {
 	OldPassword     string `json:"old_password" example:"Secret123!"     validate:"required"`
 	NewPassword     string `json:"new_password" example:"NewSecret123!"     validate:"required,min=8"`
 	ConfirmPassword string `json:"confirm_password" example:"NewSecret123!" validate:"required,eqfield=NewPassword"`
 }
 
-// RegisterDeviceRequest is the body for POST /api/v1/devices.
 type RegisterDeviceRequest struct {
 	Token    string `json:"token" example:"fcm-token-123"    validate:"required"`
 	Platform string `json:"platform" example:"IOS" validate:"required,oneof=IOS ANDROID"`
+}
+
+type SocialLoginRequest struct {
+	IDToken  string `json:"id_token" example:"eyJhbGciOi..." validate:"required"`
+	Provider string `json:"provider" example:"google" validate:"required,oneof=google apple"`
+	Name     string `json:"name" example:"John Doe"`
+	Email    string `json:"email" example:"user@example.com" validate:"required,email"`
 }

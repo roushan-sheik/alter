@@ -61,3 +61,18 @@ func RequirePremium(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
+
+// RequireAdmin is a middleware that gates routes to admin users only.
+// It must be applied after AuthMiddleware (so the "user" claims are already in context).
+func RequireAdmin(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c *echo.Context) error {
+		claims, ok := c.Get("user").(*auth.JwtCustomClaims)
+		if !ok || (claims.Role != "admin" && claims.Role != "ADMIN") {
+			return c.JSON(http.StatusForbidden, map[string]string{
+				"code":    "403",
+				"message": "This resource requires admin privileges.",
+			})
+		}
+		return next(c)
+	}
+}

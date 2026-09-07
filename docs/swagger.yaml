@@ -1,123 +1,201 @@
 basePath: /
 definitions:
-  gotickets_internal_domain_content_dto.ContentDetail:
+  gotickets_internal_domain_library_dto.CategoryResponse:
     properties:
-      audiences:
-        items:
-          type: string
-        type: array
-      author_or_speaker:
-        example: Pastor John
-        type: string
-      body_text:
-        example: Dear Lord, thank you for this day...
-        type: string
-      category_tag:
-        example: Thanksgiving
-        type: string
-      duration_seconds:
-        example: 180
-        type: integer
       id:
-        example: a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d
         type: string
-      is_premium:
-        example: true
-        type: boolean
-      media_type:
-        example: AUDIO
+      name:
+        type: string
+    type: object
+  gotickets_internal_domain_library_dto.CreateCategoryReq:
+    properties:
+      name:
+        maxLength: 100
+        type: string
+    required:
+    - name
+    type: object
+  gotickets_internal_domain_library_dto.CreateLibraryReq:
+    properties:
+      category:
+        maxLength: 100
+        type: string
+      content_text:
         type: string
       media_url:
-        description: nil if premium-gated
-        example: https://example.com/audio.mp3
         type: string
-      published_at:
-        example: "2026-08-17T15:00:00Z"
+      short_description:
         type: string
+      thumbnail_url:
+        type: string
+      title:
+        maxLength: 255
+        type: string
+    required:
+    - category
+    - content_text
+    - short_description
+    - thumbnail_url
+    - title
+    type: object
+  gotickets_internal_domain_library_dto.LibraryDetailsResponse:
+    properties:
+      library_item:
+        $ref: '#/definitions/gotickets_internal_domain_library_dto.LibraryResponse'
       related:
         items:
-          $ref: '#/definitions/gotickets_internal_domain_content_dto.ContentSummary'
+          $ref: '#/definitions/gotickets_internal_domain_library_dto.LibraryResponse'
         type: array
-      sub_type:
-        example: Morning
-        type: string
-      thumbnail_url:
-        example: https://example.com/thumb.jpg
-        type: string
-      title:
-        example: Morning Prayer for Peace
-        type: string
-      type:
-        example: PRAYER
-        type: string
     type: object
-  gotickets_internal_domain_content_dto.ContentListResponse:
+  gotickets_internal_domain_library_dto.LibraryResponse:
     properties:
-      items:
-        items:
-          $ref: '#/definitions/gotickets_internal_domain_content_dto.ContentSummary'
-        type: array
-      page:
-        example: 1
-        type: integer
-      page_size:
-        example: 20
-        type: integer
-      total:
-        example: 100
-        type: integer
-    type: object
-  gotickets_internal_domain_content_dto.ContentSummary:
-    properties:
-      audiences:
-        items:
-          type: string
-        type: array
-      author_or_speaker:
-        example: Pastor John
+      category:
         type: string
-      category_tag:
-        example: Thanksgiving
+      content_text:
         type: string
-      duration_seconds:
-        example: 180
-        type: integer
+      created_at:
+        type: string
       id:
-        example: a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d
         type: string
-      is_premium:
-        example: true
-        type: boolean
-      media_type:
-        example: AUDIO
+      media_url:
         type: string
-      published_at:
-        example: "2026-08-17T15:00:00Z"
-        type: string
-      sub_type:
-        example: Morning
+      short_description:
         type: string
       thumbnail_url:
-        example: https://example.com/thumb.jpg
         type: string
       title:
-        example: Morning Prayer for Peace
         type: string
-      type:
-        example: PRAYER
+      updated_at:
         type: string
     type: object
-  gotickets_internal_domain_content_dto.PremiumGateResponse:
+  gotickets_internal_domain_library_dto.PaginatedLibraryResponse:
     properties:
-      code:
-        example: 403
-        type: integer
-      message:
-        example: Operation successful
+      data:
+        items:
+          $ref: '#/definitions/gotickets_internal_domain_library_dto.LibraryResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/gotickets_internal_querybuilder.Meta'
+    type: object
+  gotickets_internal_domain_library_dto.UpdateCategoryReq:
+    properties:
+      name:
+        maxLength: 100
         type: string
-      upgrade_url:
-        example: /api/v1/subscriptions/plans
+    required:
+    - name
+    type: object
+  gotickets_internal_domain_library_dto.UpdateLibraryReq:
+    properties:
+      category:
+        maxLength: 100
         type: string
+      content_text:
+        type: string
+      media_url:
+        type: string
+      short_description:
+        type: string
+      thumbnail_url:
+        type: string
+      title:
+        maxLength: 255
+        type: string
+    required:
+    - category
+    - content_text
+    - short_description
+    - thumbnail_url
+    - title
+    type: object
+  gotickets_internal_domain_motivation_dto.CreateMotivationReq:
+    properties:
+      description:
+        type: string
+      duration:
+        maxLength: 20
+        type: string
+      speaker_name:
+        maxLength: 255
+        type: string
+      thumbnail_url:
+        type: string
+      title:
+        maxLength: 255
+        type: string
+      video_url:
+        type: string
+    required:
+    - description
+    - duration
+    - speaker_name
+    - thumbnail_url
+    - title
+    - video_url
+    type: object
+  gotickets_internal_domain_motivation_dto.MotivationDetailsResponse:
+    properties:
+      motivation:
+        $ref: '#/definitions/gotickets_internal_domain_motivation_dto.MotivationResponse'
+      related:
+        items:
+          $ref: '#/definitions/gotickets_internal_domain_motivation_dto.MotivationResponse'
+        type: array
+    type: object
+  gotickets_internal_domain_motivation_dto.MotivationResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      duration:
+        type: string
+      id:
+        type: string
+      speaker_name:
+        type: string
+      thumbnail_url:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      video_url:
+        type: string
+    type: object
+  gotickets_internal_domain_motivation_dto.PaginatedMotivationResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/gotickets_internal_domain_motivation_dto.MotivationResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/gotickets_internal_querybuilder.Meta'
+    type: object
+  gotickets_internal_domain_motivation_dto.UpdateMotivationReq:
+    properties:
+      description:
+        type: string
+      duration:
+        maxLength: 20
+        type: string
+      speaker_name:
+        maxLength: 255
+        type: string
+      thumbnail_url:
+        type: string
+      title:
+        maxLength: 255
+        type: string
+      video_url:
+        type: string
+    required:
+    - description
+    - duration
+    - speaker_name
+    - thumbnail_url
+    - title
+    - video_url
     type: object
   gotickets_internal_domain_schedule_dto.ScheduleResponse:
     properties:
@@ -244,6 +322,36 @@ definitions:
         example: APPLE
         type: string
     type: object
+  gotickets_internal_domain_user_dto.AdminLoginRequest:
+    properties:
+      email:
+        example: admin@altar.com
+        type: string
+      language_preference:
+        description: 'Available languages: en (English), fr (French), es (Spanish),
+          pt (Portuguese), ht (Haitian Creole)'
+        enum:
+        - en
+        - fr
+        - es
+        - pt
+        - ht
+        example: en
+        type: string
+      password:
+        example: Admin1234
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  gotickets_internal_domain_user_dto.AuthDataResponse:
+    properties:
+      tokens:
+        $ref: '#/definitions/gotickets_internal_domain_user_dto.TokenDTO'
+      user:
+        $ref: '#/definitions/gotickets_internal_domain_user_dto.UserDTO'
+    type: object
   gotickets_internal_domain_user_dto.AuthResponse:
     properties:
       access_token:
@@ -289,6 +397,17 @@ definitions:
       email:
         example: user@example.com
         type: string
+      language_preference:
+        description: 'Available languages: en (English), fr (French), es (Spanish),
+          pt (Portuguese), ht (Haitian Creole)'
+        enum:
+        - en
+        - fr
+        - es
+        - pt
+        - ht
+        example: en
+        type: string
       password:
         example: Secret123!
         type: string
@@ -304,6 +423,9 @@ definitions:
     type: object
   gotickets_internal_domain_user_dto.ProfileResponse:
     properties:
+      age:
+        example: 25
+        type: integer
       auth_provider:
         example: EMAIL
         type: string
@@ -361,8 +483,27 @@ definitions:
     type: object
   gotickets_internal_domain_user_dto.RegisterRequest:
     properties:
+      age:
+        example: 25
+        maximum: 120
+        minimum: 0
+        type: integer
+      agreeTermsAndConditions:
+        example: true
+        type: boolean
       email:
         example: user@example.com
+        type: string
+      language_preference:
+        description: 'Available languages: en (English), fr (French), es (Spanish),
+          pt (Portuguese), ht (Haitian Creole)'
+        enum:
+        - en
+        - fr
+        - es
+        - pt
+        - ht
+        example: en
         type: string
       name:
         example: John Doe
@@ -374,30 +515,101 @@ definitions:
         minLength: 8
         type: string
     required:
+    - age
+    - agreeTermsAndConditions
     - email
     - name
     - password
     type: object
-  gotickets_internal_domain_user_dto.ResetPasswordRequest:
+  gotickets_internal_domain_user_dto.ResendOTPRequest:
     properties:
       email:
         example: user@example.com
         type: string
+    required:
+    - email
+    type: object
+  gotickets_internal_domain_user_dto.ResetPasswordRequest:
+    properties:
       new_password:
         example: NewSecret123!
         minLength: 8
         type: string
-      otp:
-        example: "12345"
+      reset_token:
+        example: eyJhb...
+        type: string
+    required:
+    - new_password
+    - reset_token
+    type: object
+  gotickets_internal_domain_user_dto.SocialLoginRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      id_token:
+        example: eyJhbGciOi...
+        type: string
+      name:
+        example: John Doe
+        type: string
+      provider:
+        enum:
+        - google
+        - apple
+        example: google
         type: string
     required:
     - email
-    - new_password
-    - otp
+    - id_token
+    - provider
+    type: object
+  gotickets_internal_domain_user_dto.StandardAuthResponse:
+    properties:
+      data:
+        $ref: '#/definitions/gotickets_internal_domain_user_dto.AuthDataResponse'
+      message:
+        example: Login successful
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  gotickets_internal_domain_user_dto.StandardResponse:
+    properties:
+      data: {}
+      message:
+        example: Operation successful
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  gotickets_internal_domain_user_dto.TokenDTO:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsIn...
+        type: string
+      refresh_token:
+        example: eyJhbGciOiJIUzI1NiIsIn...
+        type: string
     type: object
   gotickets_internal_domain_user_dto.UpdateProfileRequest:
     properties:
+      age:
+        example: 25
+        maximum: 120
+        minimum: 0
+        type: integer
       language_preference:
+        description: 'Available languages: en (English), fr (French), es (Spanish),
+          pt (Portuguese), ht (Haitian Creole)'
+        enum:
+        - en
+        - fr
+        - es
+        - pt
+        - ht
         example: en
         type: string
       location:
@@ -409,10 +621,47 @@ definitions:
         minLength: 2
         type: string
       theme_preference:
+        description: 'Available themes: LIGHT, DARK'
         enum:
-        - IVORY
-        - NAVY
-        example: NAVY
+        - LIGHT
+        - DARK
+        example: DARK
+        type: string
+    type: object
+  gotickets_internal_domain_user_dto.UserDTO:
+    properties:
+      avatar_url:
+        example: https://example.com/avatar.jpg
+        type: string
+      email:
+        example: user@example.com
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: John Doe
+        type: string
+      role:
+        example: user
+        type: string
+    type: object
+  gotickets_internal_domain_user_dto.VerifyOTPRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      otp:
+        example: "12345"
+        type: string
+    required:
+    - email
+    - otp
+    type: object
+  gotickets_internal_domain_user_dto.VerifyOTPResponse:
+    properties:
+      reset_token:
+        example: eyJhbGciOiJIUzI1NiIsIn...
         type: string
     type: object
   gotickets_internal_httpresponse.Error:
@@ -424,13 +673,59 @@ definitions:
       message:
         type: string
     type: object
+  gotickets_internal_querybuilder.Meta:
+    properties:
+      limit:
+        description: Limit is the number of items per page.
+        type: integer
+      page:
+        description: Page is the current page number (1-indexed).
+        type: integer
+      total:
+        description: Total is the total number of matching records.
+        type: integer
+      total_pages:
+        description: TotalPages is the total number of pages.
+        type: integer
+    type: object
+  internal_domain_media.DeleteRequest:
+    properties:
+      url:
+        example: https://res.cloudinary.com/demo/image/upload/v1234/zick/uploads/abc.jpg
+        type: string
+    required:
+    - url
+    type: object
+  internal_domain_media.DeleteResponse:
+    properties:
+      message:
+        example: File deleted successfully
+        type: string
+    type: object
+  internal_domain_media.UploadResponse:
+    properties:
+      public_id:
+        example: zick/content/abc123
+        type: string
+      url:
+        example: https://res.cloudinary.com/demo/image/upload/sample.jpg
+        type: string
+    type: object
   internal_server.HealthResponse:
     properties:
       database:
         type: string
+      docs_url:
+        type: string
+      environment:
+        type: string
+      message:
+        type: string
       status:
         type: string
       timestamp:
+        type: string
+      version:
         type: string
     type: object
   internal_server.WelcomeResponse:
@@ -446,7 +741,6 @@ definitions:
       version:
         type: string
     type: object
-host: localhost:5000
 info:
   contact:
     email: support@zick.app
@@ -462,7 +756,7 @@ info:
 paths:
   /:
     get:
-      description: Root endpoint to verify the API is running.
+      description: Root endpoint — confirms the API is running.
       produces:
       - application/json
       responses:
@@ -470,9 +764,297 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/internal_server.WelcomeResponse'
-      summary: Welcome to GoTickets API
+      summary: Welcome
       tags:
       - System
+  /api/v1/admin/library:
+    post:
+      consumes:
+      - application/json
+      description: Admin endpoint to create a new library item.
+      parameters:
+      - description: Library payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gotickets_internal_domain_library_dto.CreateLibraryReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/gotickets_internal_domain_library_dto.LibraryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      security:
+      - BearerAuth: []
+      summary: Create a library item
+      tags:
+      - Library
+  /api/v1/admin/library-categories:
+    post:
+      consumes:
+      - application/json
+      description: Admin endpoint to create a new category.
+      parameters:
+      - description: Category payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gotickets_internal_domain_library_dto.CreateCategoryReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/gotickets_internal_domain_library_dto.CategoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      security:
+      - BearerAuth: []
+      summary: Create a library category
+      tags:
+      - Library Categories
+  /api/v1/admin/library-categories/{id}:
+    delete:
+      description: Admin endpoint to delete a category.
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete a library category
+      tags:
+      - Library Categories
+    put:
+      consumes:
+      - application/json
+      description: Admin endpoint to update a category.
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Category payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gotickets_internal_domain_library_dto.UpdateCategoryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gotickets_internal_domain_library_dto.CategoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      security:
+      - BearerAuth: []
+      summary: Update a library category
+      tags:
+      - Library Categories
+  /api/v1/admin/library/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Admin endpoint to delete an existing library item.
+      parameters:
+      - description: Library Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      security:
+      - BearerAuth: []
+      summary: Delete a library item
+      tags:
+      - Library
+    put:
+      consumes:
+      - application/json
+      description: Admin endpoint to update an existing library item.
+      parameters:
+      - description: Library Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Library payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gotickets_internal_domain_library_dto.UpdateLibraryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gotickets_internal_domain_library_dto.LibraryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      security:
+      - BearerAuth: []
+      summary: Update a library item
+      tags:
+      - Library
+  /api/v1/admin/motivations:
+    post:
+      consumes:
+      - application/json
+      description: Admin endpoint to create a new motivation.
+      parameters:
+      - description: Motivation payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gotickets_internal_domain_motivation_dto.CreateMotivationReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/gotickets_internal_domain_motivation_dto.MotivationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      security:
+      - BearerAuth: []
+      summary: Create a motivation
+      tags:
+      - Motivation
+  /api/v1/admin/motivations/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Admin endpoint to delete an existing motivation.
+      parameters:
+      - description: Motivation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      security:
+      - BearerAuth: []
+      summary: Delete a motivation
+      tags:
+      - Motivation
+    put:
+      consumes:
+      - application/json
+      description: Admin endpoint to update an existing motivation.
+      parameters:
+      - description: Motivation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Motivation payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gotickets_internal_domain_motivation_dto.UpdateMotivationReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gotickets_internal_domain_motivation_dto.MotivationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      security:
+      - BearerAuth: []
+      summary: Update a motivation
+      tags:
+      - Motivation
+  /api/v1/auth/admin/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates an admin using hardcoded credentials. Returns access
+        + refresh JWT pair.
+      parameters:
+      - description: Admin Login payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gotickets_internal_domain_user_dto.AdminLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gotickets_internal_domain_user_dto.AuthResponse'
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      summary: Admin Login
+      tags:
+      - 1. Auth - Onboarding
   /api/v1/auth/forgot-password:
     post:
       consumes:
@@ -499,12 +1081,14 @@ paths:
             $ref: '#/definitions/gotickets_internal_httpresponse.Error'
       summary: Request password reset OTP
       tags:
-      - Auth
+      - 2. Auth - Password Recovery
   /api/v1/auth/login:
     post:
       consumes:
       - application/json
-      description: Authenticates an EMAIL user. Returns access + refresh JWT pair.
+      description: 'Authenticates an EMAIL user. Returns user profile + access/refresh
+        JWT pair. Available languages: en (English), fr (French), es (Spanish), pt
+        (Portuguese), ht (Haitian Creole).'
       parameters:
       - description: Login payload
         in: body
@@ -516,9 +1100,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Login successful
           schema:
-            $ref: '#/definitions/gotickets_internal_domain_user_dto.AuthResponse'
+            $ref: '#/definitions/gotickets_internal_domain_user_dto.StandardAuthResponse'
         "400":
           description: Validation error
           schema:
@@ -529,7 +1113,7 @@ paths:
             $ref: '#/definitions/gotickets_internal_httpresponse.Error'
       summary: Login
       tags:
-      - Auth
+      - 1. Auth - Onboarding
   /api/v1/auth/logout:
     post:
       consumes:
@@ -556,7 +1140,7 @@ paths:
       - BearerAuth: []
       summary: Logout
       tags:
-      - Auth
+      - 3. Auth - Session Management
   /api/v1/auth/refresh:
     post:
       consumes:
@@ -582,13 +1166,15 @@ paths:
             $ref: '#/definitions/gotickets_internal_httpresponse.Error'
       summary: Refresh access token
       tags:
-      - Auth
+      - 3. Auth - Session Management
   /api/v1/auth/register:
     post:
       consumes:
       - application/json
-      description: Creates a new EMAIL-provider account. Returns access + refresh
-        JWT pair. Duplicate email returns 409.
+      description: 'Creates a new EMAIL-provider account. Returns user profile + access/refresh
+        JWT pair. Duplicate email returns 409. Available languages: en (English),
+        fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole). Available
+        auth providers: EMAIL, GOOGLE, APPLE.'
       parameters:
       - description: Registration payload
         in: body
@@ -600,9 +1186,9 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Registration successful
           schema:
-            $ref: '#/definitions/gotickets_internal_domain_user_dto.AuthResponse'
+            $ref: '#/definitions/gotickets_internal_domain_user_dto.StandardAuthResponse'
         "400":
           description: Validation error
           schema:
@@ -617,14 +1203,46 @@ paths:
             $ref: '#/definitions/gotickets_internal_httpresponse.Error'
       summary: Register a new user
       tags:
-      - Auth
+      - 1. Auth - Onboarding
+  /api/v1/auth/resend-otp:
+    post:
+      consumes:
+      - application/json
+      description: Enforces a 1-minute cooldown, invalidates old OTPs, and sends a
+        new 5-digit OTP to the email.
+      parameters:
+      - description: Email address
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gotickets_internal_domain_user_dto.ResendOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gotickets_internal_domain_user_dto.MessageResponse'
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+        "429":
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      summary: Resend password reset OTP
+      tags:
+      - 2. Auth - Password Recovery
   /api/v1/auth/reset-password:
     post:
       consumes:
       - application/json
-      description: Verifies the 5-digit OTP and updates the user password.
+      description: Verifies the temporary reset token and updates the user password,
+        revoking all existing sessions.
       parameters:
-      - description: Email + OTP + new password
+      - description: Reset token + new password
         in: body
         name: request
         required: true
@@ -638,167 +1256,84 @@ paths:
           schema:
             $ref: '#/definitions/gotickets_internal_domain_user_dto.MessageResponse'
         "400":
+          description: Invalid or expired reset token
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      summary: Reset password with reset token
+      tags:
+      - 2. Auth - Password Recovery
+  /api/v1/auth/social-login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user using Firebase ID token (Google or Apple).
+        Returns access + refresh JWT pair.
+      parameters:
+      - description: Social Login payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gotickets_internal_domain_user_dto.SocialLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gotickets_internal_domain_user_dto.AuthResponse'
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+        "401":
+          description: Invalid token
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      summary: Social Login
+      tags:
+      - 1. Auth - Onboarding
+  /api/v1/auth/verify-otp:
+    post:
+      consumes:
+      - application/json
+      description: Verifies the 5-digit OTP and returns a temporary reset token.
+      parameters:
+      - description: Email + OTP
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gotickets_internal_domain_user_dto.VerifyOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/gotickets_internal_domain_user_dto.StandardResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/gotickets_internal_domain_user_dto.VerifyOTPResponse'
+              type: object
+        "400":
           description: Invalid or expired OTP
           schema:
             $ref: '#/definitions/gotickets_internal_httpresponse.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
-      summary: Reset password with OTP
+      summary: Verify OTP for password reset
       tags:
-      - Auth
-  /api/v1/content:
-    get:
-      description: Returns a paginated, filterable list of content items. Supports
-        `type`, `sub_type`, `audience`, `category_tag`, and `q` (full-text search)
-        query parameters.
-      parameters:
-      - description: Content type (PRAYER, MOTIVATION, WORSHIP, PROVERB, DAILY_QUOTE,
-          ILLUSTRATION, ENCOURAGEMENT)
-        in: query
-        name: type
-        type: string
-      - description: Sub-type (e.g. Morning, Night)
-        in: query
-        name: sub_type
-        type: string
-      - description: Audience (ALL, KIDS, TEENS)
-        in: query
-        name: audience
-        type: string
-      - description: Category tag (e.g. Thanksgiving, Intercession)
-        in: query
-        name: category_tag
-        type: string
-      - description: Full-text search query
-        in: query
-        name: q
-        type: string
-      - description: 'Page number (default: 1)'
-        in: query
-        name: page
-        type: integer
-      - description: 'Items per page (default: 20, max: 100)'
-        in: query
-        name: page_size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/gotickets_internal_domain_content_dto.ContentListResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
-      security:
-      - BearerAuth: []
-      summary: List content
-      tags:
-      - Content
-  /api/v1/content/{id}:
-    get:
-      description: Returns full detail for a content item. If the content is premium
-        and the user is not premium, returns HTTP 403 with an upgrade prompt.
-      parameters:
-      - description: Content UUID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/gotickets_internal_domain_content_dto.ContentDetail'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
-        "403":
-          description: Premium content — upgrade required
-          schema:
-            $ref: '#/definitions/gotickets_internal_domain_content_dto.PremiumGateResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
-      security:
-      - BearerAuth: []
-      summary: Get content detail
-      tags:
-      - Content
-  /api/v1/content/{id}/related:
-    get:
-      description: Returns a list of content items related to the given content ID
-        via the related_content join table.
-      parameters:
-      - description: Content UUID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/gotickets_internal_domain_content_dto.ContentSummary'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
-      security:
-      - BearerAuth: []
-      summary: Get related content
-      tags:
-      - Content
-  /api/v1/content/daily-quote:
-    get:
-      description: Returns the DAILY_QUOTE content item for the current date, filtered
-        by published_at.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/gotickets_internal_domain_content_dto.ContentDetail'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
-        "404":
-          description: No quote for today
-          schema:
-            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
-      security:
-      - BearerAuth: []
-      summary: Get today's daily quote
-      tags:
-      - Content
+      - 2. Auth - Password Recovery
   /api/v1/devices:
     post:
       consumes:
       - application/json
-      description: Registers or refreshes an FCM (Android) or APNs (iOS) push notification
-        token. Upserts on (user_id, token).
+      description: 'Registers or refreshes an FCM (Android) or APNs (iOS) push notification
+        token. Upserts on (user_id, token). Available platforms: IOS, ANDROID.'
       parameters:
       - description: Device token payload
         in: body
@@ -830,6 +1365,150 @@ paths:
       summary: Register device token
       tags:
       - Devices
+  /api/v1/library:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a paginated list of library items. Supports search, sort,
+        category filtering, and pagination via query params.
+      parameters:
+      - description: Search by title, category, or description
+        in: query
+        name: search
+        type: string
+      - description: Filter by category
+        in: query
+        name: category
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10)'
+        in: query
+        name: limit
+        type: integer
+      - description: Sort column; prefix with - for DESC (e.g. -created_at)
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gotickets_internal_domain_library_dto.PaginatedLibraryResponse'
+      summary: Get all library items
+      tags:
+      - Library
+  /api/v1/library-categories:
+    get:
+      description: Retrieves all library categories.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/gotickets_internal_domain_library_dto.CategoryResponse'
+            type: array
+      summary: Get all library categories
+      tags:
+      - Library Categories
+  /api/v1/library/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves details of a specific library item along with related
+        items.
+      parameters:
+      - description: Library Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gotickets_internal_domain_library_dto.LibraryDetailsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      summary: Get library item details
+      tags:
+      - Library
+  /api/v1/motivations:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a paginated list of motivation items. Supports search,
+        sort, and pagination via query params.
+      parameters:
+      - description: Search by title or speaker name
+        in: query
+        name: search
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10)'
+        in: query
+        name: limit
+        type: integer
+      - description: Sort column; prefix with - for DESC (e.g. -created_at)
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gotickets_internal_domain_motivation_dto.PaginatedMotivationResponse'
+      summary: Get all motivations
+      tags:
+      - Motivation
+  /api/v1/motivations/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves details of a specific motivation along with related motivations.
+      parameters:
+      - description: Motivation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gotickets_internal_domain_motivation_dto.MotivationDetailsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      summary: Get motivation details
+      tags:
+      - Motivation
   /api/v1/schedules/me:
     get:
       description: Returns the authenticated user's prayer schedule. Creates a default
@@ -987,6 +1666,85 @@ paths:
       summary: Handle store webhook
       tags:
       - Subscriptions
+  /api/v1/upload:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        Permanently removes a file from Cloudinary using its public_id.
+        The public_id is returned by POST /api/v1/upload.
+      parameters:
+      - description: Full Cloudinary URL to delete
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_media.DeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_media.DeleteResponse'
+        "400":
+          description: Missing public_id
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+        "503":
+          description: Upload service unavailable
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      security:
+      - BearerAuth: []
+      summary: Delete an uploaded file
+      tags:
+      - Media
+    post:
+      consumes:
+      - multipart/form-data
+      description: |-
+        Uploads any file (image, audio, etc.) to Cloudinary and returns the public URL.
+        Pass an optional `folder` query parameter to organise assets (e.g. `?folder=content/thumbnails`).
+        The returned `url` can be stored and referenced by any domain (content, profile, etc.).
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: 'Cloudinary folder (default: zick/uploads)'
+        in: query
+        name: folder
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_media.UploadResponse'
+        "400":
+          description: Missing or oversized file
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+        "503":
+          description: Upload service unavailable
+          schema:
+            $ref: '#/definitions/gotickets_internal_httpresponse.Error'
+      security:
+      - BearerAuth: []
+      summary: Upload a file
+      tags:
+      - Media
   /api/v1/users/me:
     delete:
       description: Soft-deletes the authenticated user's account (sets deleted_at).
@@ -1036,7 +1794,9 @@ paths:
     put:
       consumes:
       - application/json
-      description: Updates name, location, theme preference, or language preference.
+      description: 'Updates name, location, theme preference (Available: LIGHT, DARK),
+        or language preference. Duplicate email returns 409. Available languages:
+        en (English), fr (French), es (Spanish), pt (Portuguese), ht (Haitian Creole).'
       parameters:
       - description: Fields to update (all optional)
         in: body
@@ -1142,7 +1902,7 @@ paths:
       - Users
   /health:
     get:
-      description: Check the health status of the API and the database connection.
+      description: Returns API metadata and database connectivity status.
       produces:
       - application/json
       responses:

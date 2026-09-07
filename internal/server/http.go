@@ -1,13 +1,15 @@
 package server
 
 import (
+	"errors"
 	"fmt"
-	"net/http"
-	"time"
+	"strings"
 
 	"gotickets/internal/auth"
 	"gotickets/internal/config"
-	"gotickets/internal/domain/content"
+	"gotickets/internal/domain/library"
+	"gotickets/internal/domain/media"
+	"gotickets/internal/domain/motivation"
 	"gotickets/internal/domain/schedule"
 	"gotickets/internal/domain/subscription"
 	"gotickets/internal/domain/user"
@@ -25,93 +27,99 @@ type customValidator struct {
 
 func (cv *customValidator) Validate(i any) error {
 	if err := cv.validator.Struct(i); err != nil {
-		return echo.ErrBadRequest.Wrap(err)
+		var valErrs validator.ValidationErrors
+		if errors.As(err, &valErrs) {
+			var errMsgs []string
+			for _, e := range valErrs {
+				errMsgs = append(errMsgs, humanizeValidationError(e))
+			}
+			return fmt.Errorf("%s", strings.Join(errMsgs, "; "))
+		}
+		return err
 	}
 	return nil
 }
 
-// Start initializes and runs the HTTP server.
-// It runs AutoMigrate, seeds reference data, registers all domain routes, and starts listening.
-func Start(db *gorm.DB, cfg *config.Config, uploader upload.Uploader) {
-	// AutoMigrate all domain entities
-	if err := db.AutoMigrate(
-		// user domain
-		&user.User{},
-		&user.RefreshToken{},
-		&user.OTP{},
-		&user.DeviceToken{},
-		// content domain
-		&content.Content{},
-		&content.ContentAudience{},
-		&content.RelatedContentJoin{},
-		// schedule domain
-		&schedule.UserSchedule{},
-		// subscription domain
-		&subscription.SubscriptionPlan{},
-		&subscription.Subscription{},
-	); err != nil {
-		panic("AutoMigrate failed: " + err.Error())
+func humanizeValidationError(e validator.FieldError) string {
+	field := e.Field()
+	switch e.Tag() {
+	case "required":
+		return fmt.Sprintf("%s is required", field)
+	case "email":
+		return fmt.Sprintf("%s must be a valid email address", field)
+	case "min":
+		switch e.Kind().String() {
+		case "string":
+			return fmt.Sprintf("%s must be at least %s characters long", field, e.Param())
+		default:
+			return fmt.Sprintf("%s must be at least %s", field, e.Param())
+		}
+	case "max":
+		switch e.Kind().String() {
+		case "string":
+			return fmt.Sprintf("%s must be no more than %s characters long", field, e.Param())
+		default:
+			return fmt.Sprintf("%s must be no more than %s", field, e.Param())
+		}
+	case "len":
+		return fmt.Sprintf("%s must be exactly %s characters long", field, e.Param())
+	case "oneof":
+		return fmt.Sprintf("%s must be one of: %s", field, strings.ReplaceAll(e.Param(), " ", ", "))
+	case "eqfield":
+		return fmt.Sprintf("%s must match %s", field, e.Param())
+	default:
+		return fmt.Sprintf("%s is invalid", field)
 	}
+}
+
+func Start(db *gorm.DB, cfg *config.Config, uploader upload.Uploader) {
+	migrate(db)
+	user.SeedAdmin(db, cfg.AdminEmail, cfg.AdminPassword)
 
 	e := echo.New()
 	e.Validator = &customValidator{validator: validator.New()}
 	e.Use(middleware.RequestLogger())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173", "http://127.0.0.1:3000"},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowCredentials: true,
+	}))
 
-	// System routes
-	e.GET("/", WelcomeHandler)
-	e.GET("/health", HealthCheckHandler(db))
-
-	// Documentation (Swagger UI at /swagger/index.html)
+	e.GET("/", WelcomeHandler(cfg))
+	e.GET("/health", HealthCheckHandler(db, cfg))
 	RegisterSwagger(e)
 
-	// Build shared JWT service — used by all domain route registrations
 	jwtSvc := auth.NewJWTService(cfg.JwtAccessSecret, cfg.JwtRefreshSecret, cfg.JwtAccessExpiry, cfg.JwtRefreshExpiry)
-
-	// Domain 1: User (auth + profile + devices)
-	user.RegisterRoutes(e, db, cfg, uploader)
-
-	// Build a user service reference for domains that need premium checks or user ID resolution
 	userRepo := user.NewRepository(db)
-	userSvc := user.NewService(userRepo, jwtSvc, uploader, nil)
+	userSvc := user.NewService(userRepo, jwtSvc, uploader, nil, nil, cfg.AdminEmail, cfg.AdminPassword)
 
-	// Domain 2: Content
-	content.RegisterRoutes(e, db, jwtSvc, userSvc)
-
-	// Domain 3: Schedule
+	user.RegisterRoutes(e, db, cfg, uploader)
 	schedule.RegisterRoutes(e, db, jwtSvc, userSvc)
-
-	// Domain 4: Subscription
 	subscription.RegisterRoutes(e, db, jwtSvc, userSvc, userRepo)
+	media.RegisterRoutes(e, jwtSvc, uploader, cfg)
+	motivation.RegisterRoutes(e, db, jwtSvc)
+	library.RegisterRoutes(e, db, jwtSvc)
 
-	port := fmt.Sprintf(":%s", cfg.Port)
-	fmt.Printf("\033[1;32m🚀 Server is running on http://localhost:%s\033[0m\n", cfg.Port)
-	if err := e.Start(port); err != nil {
-		e.Logger.Error("failed to start server", "error", err)
+	addr := fmt.Sprintf(":%s", cfg.Port)
+	fmt.Printf("\033[1;32m🚀 Server running on http://localhost:%s\033[0m\n", cfg.Port)
+	if err := e.Start(addr); err != nil {
+		e.Logger.Error("server stopped", "error", err)
 	}
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// System handlers
-// ──────────────────────────────────────────────────────────────────────────────
-
-// HealthCheckHandler godoc
-// @Summary      Health Check
-// @Description  Check the health status of the API and the database connection.
-// @Tags         System
-// @Produce      json
-// @Success      200  {object}  HealthResponse
-// @Router       /health [get]
-func HealthCheckHandler(db *gorm.DB) echo.HandlerFunc {
-	return func(c *echo.Context) error {
-		dbStatus := "up"
-		sqlDB, err := db.DB()
-		if err != nil || sqlDB.Ping() != nil {
-			dbStatus = "down"
-		}
-		return c.JSON(http.StatusOK, HealthResponse{
-			Status:    "up",
-			Database:  dbStatus,
-			Timestamp: time.Now().Format(time.RFC3339),
-		})
+func migrate(db *gorm.DB) {
+	if err := db.AutoMigrate(
+		&user.User{},
+		&user.RefreshToken{},
+		&user.OTP{},
+		&user.DeviceToken{},
+		&schedule.UserSchedule{},
+		&subscription.SubscriptionPlan{},
+		&subscription.Subscription{},
+		&motivation.Motivation{},
+		&library.LibraryItem{},
+		&library.LibraryCategory{},
+	); err != nil {
+		panic("AutoMigrate failed: " + err.Error())
 	}
 }

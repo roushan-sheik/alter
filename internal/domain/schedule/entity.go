@@ -7,13 +7,13 @@ import (
 	"gorm.io/gorm"
 )
 
-// UserSchedule represents the USER_SCHEDULES table (ERD §USER_SCHEDULES).
+// UserSchedule represents the USER_SCHEDULES table.
 // One-to-one relationship with users (enforced by unique index on user_id).
 type UserSchedule struct {
 	ID                uuid.UUID `gorm:"type:uuid;primaryKey"`
 	UserID            uuid.UUID `gorm:"type:uuid;not null;uniqueIndex"` // 1:1 with users
-	MorningPrayerTime string    `gorm:"type:varchar(8);not null;index"` // "HH:MM:SS" — indexed per ERD
-	NightPrayerTime   string    `gorm:"type:varchar(8);not null;index"` // "HH:MM:SS" — indexed per ERD
+	MorningPrayerTime string    `gorm:"type:varchar(8);not null;index"` // "HH:MM:SS"
+	NightPrayerTime   string    `gorm:"type:varchar(8);not null;index"` // "HH:MM:SS"
 	Timezone          string    `gorm:"type:varchar(100);not null"`     // IANA tz, e.g. "Asia/Dhaka"
 	PushEnabled       bool      `gorm:"not null;default:true"`
 	UpdatedAt         time.Time

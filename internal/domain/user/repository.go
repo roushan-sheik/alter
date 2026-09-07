@@ -8,8 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Repository defines the data access contract for the user domain.
-// Only the GORM implementation below should import gorm.io/gorm.
 type Repository interface {
 	// User
 	CreateUser(u *User) error
@@ -22,6 +20,7 @@ type Repository interface {
 	CreateRefreshToken(rt *RefreshToken) error
 	GetRefreshToken(tokenHash string) (*RefreshToken, error)
 	RevokeRefreshToken(tokenHash string) error
+	RevokeAllRefreshTokens(userID uuid.UUID) error
 
 	// OTPs
 	InvalidatePendingOTPs(email string) error
@@ -33,9 +32,6 @@ type Repository interface {
 	UpsertDeviceToken(dt *DeviceToken) error
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// GORM implementation
-// ──────────────────────────────────────────────────────────────────────────────
 
 type repository struct {
 	db *gorm.DB
@@ -76,7 +72,6 @@ func (r *repository) SoftDeleteUser(id uuid.UUID) error {
 	return r.db.Delete(&User{}, "id = ?", id).Error
 }
 
-// Refresh tokens
 
 func (r *repository) CreateRefreshToken(rt *RefreshToken) error {
 	return r.db.Create(rt).Error
@@ -101,7 +96,13 @@ func (r *repository) RevokeRefreshToken(tokenHash string) error {
 		Update("revoked_at", now).Error
 }
 
-// OTPs
+func (r *repository) RevokeAllRefreshTokens(userID uuid.UUID) error {
+	now := time.Now()
+	return r.db.Model(&RefreshToken{}).
+		Where("user_id = ? AND revoked_at IS NULL", userID).
+		Update("revoked_at", now).Error
+}
+
 
 func (r *repository) InvalidatePendingOTPs(email string) error {
 	now := time.Now()
@@ -131,7 +132,6 @@ func (r *repository) MarkOTPUsed(id uuid.UUID) error {
 	return r.db.Model(&OTP{}).Where("id = ?", id).Update("is_used", true).Error
 }
 
-// Devices
 
 func (r *repository) UpsertDeviceToken(dt *DeviceToken) error {
 	var existing DeviceToken

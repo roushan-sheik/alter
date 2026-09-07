@@ -36,7 +36,7 @@ const (
 	StatusExpired  SubscriptionStatus = "EXPIRED"
 )
 
-// SubscriptionPlan represents the SUBSCRIPTION_PLANS table (ERD §SUBSCRIPTION_PLANS).
+// SubscriptionPlan represents the SUBSCRIPTION_PLANS table.
 type SubscriptionPlan struct {
 	ID              uuid.UUID       `gorm:"type:uuid;primaryKey"`
 	Code            PlanCode        `gorm:"type:varchar(50);not null;uniqueIndex"`
@@ -54,7 +54,7 @@ func (p *SubscriptionPlan) BeforeCreate(_ *gorm.DB) error {
 	return nil
 }
 
-// Subscription represents the SUBSCRIPTIONS table (ERD §SUBSCRIPTIONS).
+// Subscription represents the SUBSCRIPTIONS table.
 type Subscription struct {
 	ID                    uuid.UUID          `gorm:"type:uuid;primaryKey"`
 	UserID                uuid.UUID          `gorm:"type:uuid;not null;index"`

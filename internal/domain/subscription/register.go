@@ -17,19 +17,15 @@ func RegisterRoutes(e *echo.Echo, db *gorm.DB, jwtSvc auth.JWTService, userSvc u
 	svc := NewService(repo, verifier, userRepo)
 	h := NewHandler(svc, userSvc)
 
-	// Seed plans once on startup if the table is empty
 	if err := SeedPlans(repo); err != nil {
-		// Non-fatal: log and continue
-		e.Logger.Warn("Failed to seed subscription plans: ", err)
+		e.Logger.Warn("Failed to seed subscription plans", "error", err)
 	}
 
 	authMW := middlewares.AuthMiddleware(jwtSvc)
 
-	// Plans — requires auth
 	subsGroup := e.Group("/api/v1/subscriptions", authMW)
 	subsGroup.GET("/plans", h.ListPlans)
 	subsGroup.POST("/verify", h.VerifyReceipt)
 
-	// Webhook — no auth middleware (store-signed)
 	e.POST("/api/v1/subscriptions/webhook", h.HandleWebhook)
 }

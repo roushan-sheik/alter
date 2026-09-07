@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"time"
-
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
@@ -20,13 +18,16 @@ type JwtCustomClaims struct {
 	UserID    uuid.UUID `json:"user_id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
+	Role      string    `json:"role"`
 	IsPremium bool      `json:"is_premium"`
 	jwt.RegisteredClaims
 }
 
 type JWTService interface {
-	GenerateToken(userId uuid.UUID, name string, email string, isPremium bool) (string, string, error)
+	GenerateToken(userId uuid.UUID, name string, email string, role string, isPremium bool) (string, string, error)
+	GenerateResetToken(userId uuid.UUID, email string) (string, error)
 	ValidateToken(tokenString string, isRefresh bool) (*JwtCustomClaims, error)
+	ValidateResetToken(tokenString string) (*JwtCustomClaims, error)
 }
 
 type jwtService struct {
@@ -63,12 +64,12 @@ func NewJWTService(accessSecretKey, refreshSecretKey, accessExpiry, refreshExpir
 	}
 }
 
-func (js *jwtService) GenerateToken(userId uuid.UUID, name string, email string, isPremium bool) (string, string, error) {
-	// Generate Access Token
+func (js *jwtService) GenerateToken(userId uuid.UUID, name string, email string, role string, isPremium bool) (string, string, error) {
 	accessClaims := &JwtCustomClaims{
 		UserID:    userId,
 		Name:      name,
 		Email:     email,
+		Role:      role,
 		IsPremium: isPremium,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(js.accessTokenExp)),
@@ -80,11 +81,11 @@ func (js *jwtService) GenerateToken(userId uuid.UUID, name string, email string,
 		return "", "", err
 	}
 
-	// Generate Refresh Token
 	refreshClaims := &JwtCustomClaims{
 		UserID:    userId,
 		Name:      name,
 		Email:     email,
+		Role:      role,
 		IsPremium: isPremium,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(js.refreshTokenExp)),
@@ -97,6 +98,19 @@ func (js *jwtService) GenerateToken(userId uuid.UUID, name string, email string,
 	}
 
 	return aToken, rToken, nil
+}
+
+func (js *jwtService) GenerateResetToken(userId uuid.UUID, email string) (string, error) {
+	resetClaims := &JwtCustomClaims{
+		UserID: userId,
+		Email:  email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
+			Subject:   "reset",
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, resetClaims)
+	return token.SignedString(js.jwtAccessSecretKey)
 }
 
 func (js *jwtService) ValidateToken(tokenString string, isRefresh bool) (*JwtCustomClaims, error) {
@@ -113,6 +127,28 @@ func (js *jwtService) ValidateToken(tokenString string, isRefresh bool) (*JwtCus
 		return nil, err
 	}
 	if claims, ok := token.Claims.(*JwtCustomClaims); ok && token.Valid {
+		if claims.Subject == "reset" {
+			return nil, errors.New("invalid token: expected access token")
+		}
+		return claims, nil
+	}
+	return nil, errors.New("invalid token")
+}
+
+func (js *jwtService) ValidateResetToken(tokenString string) (*JwtCustomClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &JwtCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return js.jwtAccessSecretKey, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if claims, ok := token.Claims.(*JwtCustomClaims); ok && token.Valid {
+		if claims.Subject != "reset" {
+			return nil, errors.New("invalid token: expected reset token")
+		}
 		return claims, nil
 	}
 	return nil, errors.New("invalid token")
